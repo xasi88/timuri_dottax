@@ -2,7 +2,7 @@
 
 Веб-приложение меню для кафе Katar, Грозный (Instagram @timuri_dottax).
 
-Сайт: https://xasi88.github.io/timuri_dottax/
+Сайт: https://xasi88.github.io/timuri_dottax/ (коротко: https://clck.ru/3WXvyi)
 
 - Светлая тема, нижняя панель как в приложении: Меню, Поиск, Заказ, Кафе.
 - Фирменное блюдо на главной карточке, 5 разделов, 25 блюд, окно блюда.
