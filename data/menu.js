@@ -11,7 +11,11 @@ window.CAFE = {
   phoneText: "+7 (938) 890-29-70",
   instagram: "timuri_dottax",
   rating: "4,4",
-  ratingCount: "173 оценки на Яндекс Картах",
+  ratingCount: "173 оценки",
+  mapUrl: "https://yandex.ru/maps/org/katar/132186666741/",
+  open: 9, // час открытия по Москве
+  close: 24, // час закрытия
+  features: ["Свои курьеры", "Еда с собой", "Wi-Fi", "Намазхана", "Парковка", "Летняя веранда"],
   demo: true,
 };
 

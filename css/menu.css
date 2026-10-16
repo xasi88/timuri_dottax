@@ -1,0 +1,127 @@
+/* Экран «Меню»: главная карточка, полоса разделов, карточки блюд, панель заказа сбоку */
+
+.menu-layout { max-width: var(--wrap); margin: 0 auto; padding: 8px 16px 0; }
+.menu-main { min-width: 0; }
+.side-order { display: none; }
+
+/* Главная карточка: фирменное блюдо */
+.promo {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: grid; grid-template-columns: minmax(0, 1fr) 112px; grid-template-areas: "text art" "buy buy" "rate rate";
+  align-items: center; column-gap: 8px; padding: 22px 18px 20px 22px; border-radius: var(--r-lg); color: #fff;
+  background: linear-gradient(135deg, #f2913f 0%, #e2561c 55%, #c43f12 100%);
+  box-shadow: 0 20px 40px -20px rgba(196, 63, 18, 0.7);
+}
+.promo::before, .promo::after {
+  content: ""; position: absolute; z-index: -1; border-radius: 50%; filter: blur(30px); opacity: 0.7;
+  animation: drift 9s ease-in-out infinite alternate;
+}
+.promo::before { width: 220px; height: 220px; right: -60px; top: -80px; background: #ffc46b; }
+.promo::after { width: 180px; height: 180px; left: -50px; bottom: -90px; background: #b8340c; animation-delay: -4s; }
+@keyframes drift { to { transform: translate(-30px, 30px) scale(1.15); } }
+.promo-text { grid-area: text; min-width: 0; }
+.promo-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
+.promo h1 { font-size: clamp(28px, 8vw, 44px); line-height: 1.02; font-weight: 800; letter-spacing: -0.035em; margin: 6px 0 8px; }
+.promo-meta { font-size: 14px; font-weight: 600; opacity: 0.92; }
+.promo-buy { grid-area: buy; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.promo-price { font-size: 22px; font-weight: 800; white-space: nowrap; }
+.promo .ctl.empty button { background: #fff; color: var(--fire); }
+.promo .ctl.empty button:hover { background: #fff3ea; }
+.promo .ctl.has { background: rgba(255, 255, 255, 0.95); }
+.promo-art { grid-area: art; position: relative; width: 112px; height: 112px; color: #fff; justify-self: end; }
+.promo-art::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.promo-art svg { position: relative; width: 100%; height: 100%; padding: 16px; animation: bob 4s ease-in-out infinite; }
+.promo-art .fx.flame { color: #ffd27a; }
+@keyframes bob { 50% { transform: translateY(-5px) rotate(-3deg); } }
+.promo-rating { grid-area: rate; justify-self: start; max-width: 100%; display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 99px; background: rgba(0, 0, 0, 0.14); text-decoration: none; }
+
+/* Полоса разделов */
+.chips {
+  position: sticky; z-index: 20; top: calc(var(--appbar-h) + env(safe-area-inset-top, 0px));
+  margin: 0 -16px; padding: 12px 0 10px; background: var(--bg);
+}
+.chips::after { content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px; background: linear-gradient(var(--bg), rgba(251, 247, 241, 0)); pointer-events: none; }
+.chips-track { position: relative; display: flex; gap: 6px; overflow-x: auto; padding: 0 16px; scrollbar-width: none; scroll-behavior: smooth; }
+.chips-track.more { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); }
+.chips-track::-webkit-scrollbar { display: none; }
+.chip {
+  position: relative; z-index: 1; flex: none; height: 40px; padding: 0 16px; border-radius: 99px;
+  display: inline-flex; align-items: center; font-size: 14px; font-weight: 700; white-space: nowrap;
+  text-decoration: none; color: var(--ink2); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line);
+  transition: color 0.3s;
+}
+.chip.on { color: #fff; box-shadow: none; background: transparent; }
+.chips-pill { position: absolute; top: 0; left: 0; height: 40px; border-radius: 99px; background: var(--ink); transition: transform 0.45s var(--spring), width 0.45s var(--spring); }
+
+/* Разделы и карточки */
+.group { padding-top: 20px; }
+.group-head { margin-bottom: 12px; }
+.group-head h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+.group-head p { color: var(--ink2); font-size: 14px; margin-top: 2px; }
+.grid { display: grid; gap: 10px; }
+.card {
+  display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 14px; align-items: stretch;
+  padding: 10px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-1);
+  cursor: pointer; text-align: left; transition: transform 0.3s var(--ease), box-shadow 0.3s;
+  opacity: 0; transform: translateY(16px);
+}
+.card.in { opacity: 1; transform: none; transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), box-shadow 0.3s; }
+.card:hover { box-shadow: var(--shadow-2); }
+.art { position: relative; width: 104px; height: 104px; border-radius: 14px; display: grid; place-items: center; color: var(--ink); background: var(--tint, var(--sunk)); overflow: hidden; }
+.art svg { width: 64px; height: 64px; transition: transform 0.5s var(--spring); }
+.card:hover .art svg { transform: scale(1.08) rotate(-4deg); }
+.art .fx { color: var(--fire); }
+.badge { position: absolute; top: 6px; left: 6px; max-width: calc(100% - 12px); padding: 2px 7px; border-radius: 99px; font-size: 10px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; background: var(--surface); color: var(--fire); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-body { display: flex; flex-direction: column; min-width: 0; padding: 2px 2px 0 0; }
+.c-name { font-size: 16px; line-height: 1.25; font-weight: 800; letter-spacing: -0.01em; }
+.c-desc { margin-top: 3px; color: var(--ink2); font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.c-buy { margin-top: auto; padding-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.c-price { min-width: 0; line-height: 1.15; }
+.c-price b { display: block; font-size: 17px; font-weight: 800; white-space: nowrap; }
+.c-price small { display: block; font-size: 12px; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Пар и огонь в рисунках */
+.fx.steam path { animation: steam 2.6s ease-in-out infinite; opacity: 0.7; }
+.fx.steam path:nth-child(2) { animation-delay: 0.4s; }
+.fx.steam path:nth-child(3) { animation-delay: 0.8s; }
+@keyframes steam { 50% { transform: translateY(-3px); opacity: 0.15; } }
+.fx.flame path { transform-origin: 50% 100%; transform-box: fill-box; animation: flick 0.9s ease-in-out infinite alternate; }
+.fx.flame path:nth-child(2) { animation-duration: 0.7s; }
+@keyframes flick { to { transform: scaleY(1.2) skewX(-6deg); } }
+
+.demo-note { margin: 28px 0 8px; text-align: center; color: var(--ink3); font-size: 13px; }
+
+/* Цвета плиток по разделам */
+[data-g="coal"] { --tint: #fde6d8; }
+[data-g="east"] { --tint: #fbefd3; }
+[data-g="street"] { --tint: #e9f0df; }
+[data-g="soup"] { --tint: #f8e4df; }
+[data-g="drinks"] { --tint: #e6edf5; }
+
+@media (min-width: 700px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .promo { grid-template-columns: minmax(0, 1fr) 180px; grid-template-areas: "text art" "buy art" "rate art"; padding: 32px 28px 28px 32px; }
+  .promo-buy { justify-content: flex-start; gap: 20px; }
+  .promo-art { width: 180px; height: 180px; }
+}
+
+/* Большой экран: меню слева, заказ справа */
+@media (min-width: 1024px) {
+  .menu-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; padding-top: 20px; }
+  .chips { margin: 0; }
+  .chips-track { padding: 0; }
+  .side-order {
+    display: block; position: sticky; top: calc(var(--appbar-h) + 20px);
+    max-height: calc(100vh - var(--appbar-h) - 40px); overflow-y: auto;
+    padding: 20px; border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1);
+  }
+  .promo { grid-template-columns: minmax(0, 1fr) 220px; padding: 40px; }
+  .promo-art { width: 220px; height: 220px; }
+}
+@media (min-width: 1360px) {
+  .menu-layout { grid-template-columns: minmax(0, 1fr) 380px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { opacity: 1; transform: none; }
+}

@@ -1,169 +1,131 @@
-// Сборка страницы: первый экран, разделы, карточки, окна блюда и заказа.
+// Запуск: вкладки, переходы между экранами, поиск, экран «Кафе», связь с корзиной.
 
 (function () {
-  const C = window.CAFE, M = window.MENU, I = window.ICONS, cart = window.Cart;
-  const $ = (id) => document.getElementById(id);
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const hero = M.flatMap((g) => g.items).find((it) => it.hero);
+  const { $, esc, ico, ctl, toast, fly, haptic, closeSheet } = window.UI;
+  const C = window.CAFE, M = window.MENU, cart = window.Cart;
+  const Menu = window.MenuView, Order = window.OrderView;
+  const TABS = [["menu", "Меню", ico.menu], ["search", "Поиск", ico.search], ["order", "Заказ", ico.bag], ["cafe", "Кафе", ico.cafe]];
 
-  // Первый экран
-  $("rating").innerHTML = `<i>★</i> ${C.rating}`;
-  $("place").textContent = C.place;
-  $("heroPrice").textContent = cart.rub(hero.price);
-  $("heroIcon").innerHTML = I[hero.icon];
-  $("facts").innerHTML = [C.hours, "В зале, с собой, доставка", `★ ${C.rating} · ${C.ratingCount}`].map((f) => `<li>${esc(f)}</li>`).join("");
-  $("footInfo").innerHTML = `${esc(C.place)}<br>${esc(C.hours)}<br><a href="tel:+${C.phone}">${esc(C.phoneText)}</a> · <a href="https://instagram.com/${C.instagram}" target="_blank" rel="noopener">@${esc(C.instagram)}</a>`;
-  $("demoNote").hidden = !C.demo;
+  // Вкладки: снизу на телефоне, в шапке на большом экране
+  const tabHtml = TABS.map(([id, t, svg]) => `<a class="tab" href="#${id}" data-tab="${id}">${svg}<span>${t}</span>${id === "order" ? '<i class="dot" data-count></i>' : ""}</a>`).join("");
+  $("tabbar").innerHTML = tabHtml;
+  $("tabs").innerHTML = tabHtml;
 
-  // Заголовок появляется по буквам, слово «углях» горит
-  const title = $("title");
-  let n = 0;
-  title.innerHTML = title.innerHTML.split("<br>").map((line, li) =>
-    [...line].map((ch) => `<span class="ch${li ? " fire" : ""}" style="animation-delay:${0.05 + n++ * 0.04}s">${ch === " " ? "&nbsp;" : ch}</span>`).join("")
-  ).join("<br>");
+  Menu.render();
+  Order.mount($("orderPage"), false);
+  Order.mount($("sideOrder"), true);
 
-  // Кнопка «+», которая становится счётчиком
-  function control(id, big) {
-    const q = cart.qty(id);
-    if (!q) return `<div class="ctl"><button class="add" type="button" data-add="${id}">${big ? "Добавить" : "+"}</button></div>`;
-    return `<div class="ctl has"><button type="button" data-sub="${id}" aria-label="Убрать одну">−</button><output>${q}</output><button type="button" data-add="${id}" aria-label="Добавить ещё">+</button></div>`;
+  // Открыто ли кафе сейчас: часы по Москве (Грозный)
+  function status() {
+    const h = Number(new Intl.DateTimeFormat("ru-RU", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Moscow" }).format(new Date()));
+    const open = h >= C.open && h < C.close;
+    const el = $("status");
+    el.textContent = open ? "Открыто до 00:00" : `Откроется в ${C.open}:00`;
+    el.classList.toggle("closed", !open);
   }
+  status();
+  setInterval(status, 60000);
 
-  // Разделы и карточки
-  $("menu").innerHTML = M.map((g) => `
-    <section class="group" id="g-${g.id}">
-      <div class="group-head"><h2>${esc(g.title)}</h2><p>${esc(g.note)}</p></div>
-      <div class="grid">${g.items.map((it) => `
-        <article class="card" data-open="${it.id}">
-          <div class="art">${I[it.icon]}${it.badge ? `<span class="badge">${esc(it.badge)}</span>` : ""}</div>
-          <div class="info">
-            <h3>${esc(it.name)}</h3>
-            <p>${esc(it.desc)}</p>
-            <div class="buy"><span class="price">${cart.rub(it.price)}<small>${esc(it.weight)}</small></span><span data-ctl="${it.id}">${control(it.id)}</span></div>
-          </div>
-        </article>`).join("")}
-      </div>
-    </section>`).join("");
+  // Экран «Кафе»
+  const row = (href, icon, title, sub, ext) => `<a class="row" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ""}><i>${icon}</i><div><b>${title}</b><span>${sub}</span></div>${ico.go.replace("<svg", '<svg class="go"')}</a>`;
+  $("cafePage").innerHTML = `
+    <div class="cafe-hero">
+      <h1>Katar</h1>
+      <p>Кафе в Грозном. Курица на углях, люля, плов и манты.</p>
+      <div class="cafe-rate"><b>${esc(C.rating)}</b><span class="stars" aria-hidden="true">★★★★★</span><span>${esc(C.ratingCount)} на Яндекс Картах</span></div>
+    </div>
+    <div class="rows">
+      ${row(C.mapUrl, ico.pin, esc(C.place), "Построить маршрут", true)}
+      ${row("tel:+" + C.phone, ico.phone, esc(C.phoneText), "Позвонить", false)}
+      ${row(`https://instagram.com/${C.instagram}`, ico.ig, "@" + esc(C.instagram), "Instagram", true)}
+      <div class="row"><i>${ico.clock}</i><div><b>${esc(C.hours)}</b><span>Готовим без выходных</span></div><span></span></div>
+    </div>
+    <div class="feats">${C.features.map((f) => `<span>${esc(f)}</span>`).join("")}</div>
+    <div class="cafe-cta">
+      <a class="btn btn-wa" href="https://wa.me/${C.phone}" target="_blank" rel="noopener">${ico.wa}Написать в WhatsApp</a>
+      <a class="btn btn-soft" href="#menu">Смотреть меню</a>
+    </div>`;
 
-  const reveal = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); reveal.unobserve(e.target); } });
-  }, { rootMargin: "0px 0px -8% 0px" });
-  document.querySelectorAll(".grid").forEach((grid) =>
-    [...grid.children].forEach((card, i) => { card.style.transitionDelay = `${(i % 3) * 70}ms`; reveal.observe(card); })
-  );
-
-  // Полоса разделов с бегущей подложкой
-  const track = $("catsTrack"), pill = $("catsPill");
-  track.insertAdjacentHTML("beforeend", M.map((g) => `<a href="#g-${g.id}" data-cat="${g.id}">${esc(g.title)}</a>`).join(""));
-  const links = [...track.querySelectorAll("a")];
-  function setCat(id) {
-    const a = links.find((l) => l.dataset.cat === id) || links[0];
-    links.forEach((l) => l.classList.toggle("on", l === a));
-    pill.style.width = a.offsetWidth + "px";
-    pill.style.transform = `translateX(${a.offsetLeft}px)`;
-    track.scrollTo({ left: a.offsetLeft - 16, behavior: "smooth" });
+  // Поиск: без учёта регистра и буквы «ё»
+  const norm = (s) => s.toLowerCase().replace(/ё/g, "е");
+  const all = M.flatMap((g) => g.items.map((it) => ({ it, hay: norm(`${it.name} ${it.desc} ${g.title}`) })));
+  ["Курица", "Люля", "Плов", "Манты", "Чай", "Суп"].forEach((w) => $("quick").insertAdjacentHTML("beforeend", `<button type="button">${w}</button>`));
+  function search() {
+    const q = norm($("q").value.trim());
+    $("qClear").hidden = !q;
+    $("quick").hidden = !!q;
+    if (!q) { $("results").innerHTML = ""; return; }
+    const found = all.filter((x) => q.split(/\s+/).every((w) => x.hay.includes(w))).map((x) => x.it);
+    $("results").innerHTML = found.length
+      ? `<p class="results-head">Найдено: ${found.length}</p>${found.map(Menu.card).join("")}`
+      : `<div class="blank"><div class="blank-art">${ico.search}</div><h2>Ничего не нашли</h2><p>Попробуйте другое слово: «курица», «плов», «чай».</p></div>`;
   }
-  const spy = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) setCat(e.target.id.slice(2)); });
-  }, { rootMargin: "-30% 0px -65% 0px" });
-  document.querySelectorAll(".group").forEach((s) => spy.observe(s));
-  document.fonts.ready.then(() => setCat(M[0].id));
-  addEventListener("resize", () => setCat((links.find((l) => l.classList.contains("on")) || links[0]).dataset.cat));
+  $("q").addEventListener("input", search);
+  $("qClear").addEventListener("click", () => { $("q").value = ""; search(); $("q").focus(); });
+  $("quick").addEventListener("click", (e) => { if (e.target.tagName === "BUTTON") { $("q").value = e.target.textContent; search(); } });
 
-  // Шапка темнеет после первого экрана
-  const top = $("top");
-  addEventListener("scroll", () => top.classList.toggle("solid", scrollY > 40), { passive: true });
-
-  // Окна
-  function openSheet(el) { el.classList.add("open"); el.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; }
-  function closeSheet(el) { el.classList.remove("open"); el.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; }
-  document.querySelectorAll(".sheet").forEach((s) => s.addEventListener("click", (e) => { if (e.target.closest("[data-close]")) closeSheet(s); }));
-  addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelectorAll(".sheet.open").forEach(closeSheet); });
-
-  let dishId = null;
-  function openDish(id) {
-    const it = cart.byId[id];
-    dishId = id;
-    $("dishArt").innerHTML = I[it.icon];
-    $("dishWeight").textContent = it.weight;
-    $("dishName").textContent = it.name;
-    $("dishDesc").textContent = it.desc;
-    $("dishPrice").textContent = cart.rub(it.price);
-    $("dishControl").innerHTML = control(id, true);
-    openSheet($("dishSheet"));
+  // Переходы между экранами по адресу (#menu, #search, #order, #cafe)
+  const scrollMemo = {};
+  let view = null;
+  function route() {
+    const want = (location.hash || "#menu").slice(1);
+    const next = TABS.some(([id]) => id === want) ? want : "menu";
+    if (next === view) return;
+    if (view) scrollMemo[view] = scrollY;
+    view = next;
+    document.querySelectorAll(".view").forEach((v) => { v.hidden = v.dataset.view !== next; });
+    document.querySelectorAll("[data-tab]").forEach((t) => {
+      t.classList.toggle("on", t.dataset.tab === next);
+      if (t.dataset.tab === next) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
+    });
+    scrollTo(0, scrollMemo[next] || 0);
+    if (next === "menu") Menu.refreshChips();
+    if (next === "search" && matchMedia("(hover: hover)").matches) $("q").focus({ preventScroll: true });
   }
+  addEventListener("hashchange", route);
+  route();
 
-  // Точка летит от кнопки к корзине
-  function fly(from) {
-    const bar = $("cartbar");
-    if (!bar.classList.contains("show") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const a = from.getBoundingClientRect(), b = bar.getBoundingClientRect();
-    const f = $("flyer");
-    const x0 = a.left + a.width / 2 - 9, y0 = a.top + a.height / 2 - 9;
-    const x1 = b.left + 30 - 9, y1 = b.top + b.height / 2 - 9;
-    f.animate([
-      { transform: `translate(${x0}px,${y0}px) scale(1)`, opacity: 1 },
-      { transform: `translate(${(x0 + x1) / 2}px,${Math.min(y0, y1) - 120}px) scale(1.3)`, opacity: 1, offset: 0.45 },
-      { transform: `translate(${x1}px,${y1}px) scale(0.4)`, opacity: 0.2 },
-    ], { duration: 650, easing: "cubic-bezier(.5,0,.5,1)" });
-  }
-
-  // Нажатия
+  // Нажатия: добавить, убрать, открыть блюдо
   document.addEventListener("click", (e) => {
     const add = e.target.closest("[data-add]"), sub = e.target.closest("[data-sub]");
-    if (add) { e.stopPropagation(); cart.add(add.dataset.add); fly(add); return; }
-    if (sub) { e.stopPropagation(); cart.sub(sub.dataset.sub); return; }
+    if (add) {
+      e.stopPropagation();
+      const first = !cart.qty(add.dataset.add);
+      cart.add(add.dataset.add);
+      haptic();
+      fly(add);
+      if (first) toast(`${cart.byId[add.dataset.add].name}: в заказе`);
+      return;
+    }
+    if (sub) { e.stopPropagation(); cart.sub(sub.dataset.sub); haptic(); return; }
     const card = e.target.closest("[data-open]");
-    if (card) openDish(card.dataset.open);
+    if (card) Menu.openDish(card.dataset.open);
   });
-  $("heroAdd").addEventListener("click", (e) => { cart.add(hero.id); fly(e.currentTarget); });
-  $("cartbar").addEventListener("click", () => { renderCart(); openSheet($("cartSheet")); });
-
-  // Форма заказа
-  let mode = "hall";
-  $("mode").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-mode]");
-    if (!b) return;
-    mode = b.dataset.mode;
-    [...$("mode").children].forEach((x) => x.setAttribute("aria-checked", String(x === b)));
-    $("fieldTable").hidden = mode !== "hall";
-    $("fieldTime").hidden = mode !== "pickup";
-    $("fieldAddr").hidden = mode !== "delivery";
-    updateLink();
+  document.addEventListener("keydown", (e) => {
+    const card = e.target.closest && e.target.closest("[data-open]");
+    if (card && (e.key === "Enter" || e.key === " ") && e.target === card) { e.preventDefault(); Menu.openDish(card.dataset.open); }
+    if (e.key === "Escape" && $("sheet").classList.contains("open")) closeSheet($("sheet"));
   });
-  ["inTable", "inTime", "inAddr", "inNote"].forEach((id) => $(id).addEventListener("input", updateLink));
+  $("sheet").addEventListener("click", (e) => { if (e.target.closest("[data-close]")) closeSheet($("sheet")); });
 
-  function updateLink() {
-    const text = cart.message({ mode, table: $("inTable").value.trim(), time: $("inTime").value.trim(), addr: $("inAddr").value.trim(), note: $("inNote").value.trim() });
-    $("sendWa").href = `https://wa.me/${C.phone}?text=${encodeURIComponent(text)}`;
-  }
-
-  function renderCart() {
-    const lines = cart.lines();
-    $("cartList").innerHTML = lines.map(({ item, qty }) => `
-      <li><span class="mini">${I[item.icon]}</span><div><b>${esc(item.name)}</b><span>${cart.rub(item.price)} × ${qty}</span></div>${control(item.id)}</li>`).join("");
-    $("cartEmpty").hidden = lines.length > 0;
-    $("cartForm").hidden = !lines.length;
-    $("cartTotal").textContent = cart.rub(cart.total());
-    updateLink();
-  }
-
+  // Корзина изменилась: обновить счётчики, значок «Заказ», экран заказа
   function sync() {
     document.querySelectorAll("[data-ctl]").forEach((el) => {
-      const q = cart.qty(el.dataset.ctl);
-      if (el.dataset.q !== String(q)) { el.innerHTML = control(el.dataset.ctl); el.dataset.q = q; }
+      const q = String(cart.qty(el.dataset.ctl));
+      if (el.dataset.q !== q) { el.innerHTML = ctl(el.dataset.ctl, !!el.dataset.big); el.dataset.q = q; }
     });
-    if (dishId) $("dishControl").innerHTML = control(dishId, true);
-    const bar = $("cartbar"), count = cart.count();
-    $("cartCount").textContent = count;
-    $("cartSum").textContent = cart.rub(cart.total());
-    bar.classList.toggle("show", count > 0);
-    bar.classList.remove("bump"); void bar.offsetWidth; bar.classList.add("bump");
-    if ($("cartSheet").classList.contains("open")) renderCart();
+    if (Menu.openId() && $("sheet").classList.contains("open")) $("dCtl").innerHTML = ctl(Menu.openId(), true);
+    const n = cart.count();
+    document.querySelectorAll("[data-count]").forEach((d) => {
+      const changed = d.textContent !== String(n);
+      d.textContent = n;
+      d.classList.toggle("show", n > 0);
+      if (changed && n) { d.classList.remove("bump"); void d.offsetWidth; d.classList.add("bump"); }
+    });
+    Order.update();
   }
   cart.onChange(sync);
-  document.querySelectorAll("[data-ctl]").forEach((el) => { el.dataset.q = cart.qty(el.dataset.ctl); });
-  $("cartbar").classList.toggle("show", cart.count() > 0);
-  $("cartCount").textContent = cart.count();
-  $("cartSum").textContent = cart.rub(cart.total());
+  sync();
+
+  addEventListener("scroll", () => document.querySelector(".appbar").classList.toggle("scrolled", scrollY > 4), { passive: true });
 })();

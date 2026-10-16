@@ -1,4 +1,4 @@
-// Корзина: количество блюд, сумма, текст заказа для WhatsApp.
+// Корзина: количество блюд и сумма.
 // Корзина хранится в браузере гостя, чтобы не пропасть при перезагрузке.
 
 window.Cart = (function () {
@@ -29,14 +29,5 @@ window.Cart = (function () {
     count: () => Object.values(state).reduce((a, b) => a + b, 0),
     total: () => Object.keys(state).reduce((sum, id) => sum + byId[id].price * state[id], 0),
     onChange(fn) { listeners.push(fn); },
-
-    message({ mode, table, time, addr, note }) {
-      const head = { hall: `Заказ в зале${table ? `, стол ${table}` : ""}`, pickup: `Заберу сам${time ? `, ${time}` : ""}`, delivery: "Доставка" }[mode];
-      const rows = this.lines().map(({ item, qty }) => `• ${item.name} × ${qty} = ${rub(item.price * qty)}`);
-      const out = [`Здравствуйте! ${head}.`, "", ...rows, "", `Итого: ${rub(this.total())}`];
-      if (mode === "delivery" && addr) out.push(`Адрес: ${addr}`);
-      if (note) out.push(`Пожелания: ${note}`);
-      return out.join("\n");
-    },
   };
 })();

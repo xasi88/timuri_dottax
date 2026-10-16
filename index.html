@@ -3,105 +3,113 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#120d0a">
-  <title>Katar · Куры на углях</title>
-  <meta name="description" content="Меню кафе Katar в Грозном. Курица на углях, люля, плов, манты. Заказ в WhatsApp.">
+  <title>Katar · Куры на углях · Меню и заказ</title>
+  <meta name="description" content="Меню кафе Katar в Грозном. Курица на углях, люля, плов, манты. Выберите блюда и отправьте заказ в WhatsApp.">
+  <meta name="theme-color" content="#fbf7f1">
+  <link rel="canonical" href="https://xasi88.github.io/timuri_dottax/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="Katar">
+  <meta property="og:title" content="Katar · Курица на углях">
+  <meta property="og:description" content="Меню кафе на Мира, 46 в Грозном. Выберите блюда, заказ уйдёт в WhatsApp.">
+  <meta property="og:url" content="https://xasi88.github.io/timuri_dottax/">
+  <meta property="og:image" content="https://xasi88.github.io/timuri_dottax/img/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Katar. Курица на углях. Меню и заказ в WhatsApp">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://xasi88.github.io/timuri_dottax/img/og.png">
+
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Katar">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="sheets.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/menu.css">
+  <link rel="stylesheet" href="css/views.css">
 </head>
 <body>
-  <header class="top" id="top">
-    <a class="logo" href="#hero" aria-label="Katar, наверх">KATAR<span>•</span></a>
-    <a class="rating" id="rating" href="https://yandex.ru/maps/org/katar/132186666741/" target="_blank" rel="noopener"></a>
+  <header class="appbar">
+    <div class="appbar-in">
+      <a class="brand" href="#menu" aria-label="Katar, меню">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text"><b>Katar</b><small>Куры на углях</small></span>
+      </a>
+      <nav class="tabs" id="tabs" aria-label="Разделы приложения"></nav>
+      <span class="status" id="status"></span>
+    </div>
   </header>
 
-  <section class="hero" id="hero">
-    <canvas class="embers" id="embers" aria-hidden="true"></canvas>
-    <div class="glow" aria-hidden="true"></div>
-    <div class="hero-in">
-      <p class="kicker" id="place"></p>
-      <h1 class="title" id="title">Курица<br>на углях</h1>
-      <p class="lead">Сочная внутри, с золотой корочкой. Выберите блюда здесь: заказ уйдёт в WhatsApp готовым сообщением.</p>
-      <div class="hero-cta">
-        <button class="btn btn-fire" id="heroAdd" type="button">
-          <span>Заказать курицу</span><b id="heroPrice"></b>
-        </button>
-        <a class="btn btn-ghost" href="#menu">Всё меню</a>
+  <main class="app">
+    <section class="view" id="view-menu" data-view="menu" aria-label="Меню">
+      <div class="menu-layout">
+        <div class="menu-main">
+          <article class="promo" id="promo"></article>
+          <nav class="chips" id="chips" aria-label="Разделы меню"><div class="chips-track" id="chipsTrack"><span class="chips-pill" id="chipsPill"></span></div></nav>
+          <div id="groups"></div>
+          <p class="demo-note" id="demoNote" hidden>Демо. Цены примерные, состав уточняйте у официанта.</p>
+        </div>
+        <aside class="side-order" id="sideOrder" aria-label="Ваш заказ"></aside>
       </div>
-      <ul class="facts" id="facts"></ul>
-    </div>
-    <div class="hero-dish" aria-hidden="true">
-      <div class="plate"></div>
-      <div class="hero-icon" id="heroIcon"></div>
-    </div>
-  </section>
+    </section>
 
-  <nav class="cats" id="cats" aria-label="Разделы меню">
-    <div class="cats-track" id="catsTrack"><span class="cats-pill" id="catsPill"></span></div>
-  </nav>
+    <section class="view" id="view-search" data-view="search" aria-label="Поиск" hidden>
+      <div class="page">
+        <h1 class="page-title">Поиск</h1>
+        <label class="searchbox">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="q" type="search" placeholder="Курица, плов, чай…" autocomplete="off" enterkeyhint="search" aria-label="Найти блюдо">
+          <button type="button" class="clear" id="qClear" aria-label="Очистить" hidden>×</button>
+        </label>
+        <div class="quick" id="quick"></div>
+        <div class="results" id="results"></div>
+      </div>
+    </section>
 
-  <main class="menu" id="menu"></main>
+    <section class="view" id="view-order" data-view="order" aria-label="Заказ" hidden>
+      <div class="page" id="orderPage"></div>
+    </section>
 
-  <footer class="foot">
-    <p class="foot-name">Katar</p>
-    <p id="footInfo"></p>
-    <p class="demo-note" id="demoNote" hidden>Это демо. Цены примерные, состав блюд уточняется.</p>
-  </footer>
+    <section class="view" id="view-cafe" data-view="cafe" aria-label="О кафе" hidden>
+      <div class="page" id="cafePage"></div>
+    </section>
+  </main>
 
-  <button class="cartbar" id="cartbar" type="button" aria-label="Открыть корзину">
-    <span class="cartbar-count" id="cartCount">0</span>
-    <span class="cartbar-label">Ваш заказ</span>
-    <span class="cartbar-sum" id="cartSum">0 ₽</span>
-  </button>
+  <nav class="tabbar" id="tabbar" aria-label="Разделы приложения"></nav>
 
-  <div class="sheet" id="dishSheet" aria-hidden="true">
+  <div class="sheet" id="sheet" aria-hidden="true">
     <div class="sheet-bg" data-close></div>
-    <article class="sheet-card dish" role="dialog" aria-modal="true" aria-labelledby="dishName">
-      <button class="x" type="button" data-close aria-label="Закрыть">×</button>
-      <div class="dish-art" id="dishArt"></div>
-      <p class="dish-weight" id="dishWeight"></p>
-      <h2 id="dishName"></h2>
-      <p class="dish-desc" id="dishDesc"></p>
-      <div class="dish-row">
-        <b class="dish-price" id="dishPrice"></b>
-        <div id="dishControl"></div>
+    <article class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="dName" tabindex="-1">
+      <button class="sheet-x" type="button" data-close aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div class="d-art" id="dArt"></div>
+      <div class="d-body">
+        <p class="d-meta" id="dMeta"></p>
+        <h2 class="d-name" id="dName"></h2>
+        <p class="d-desc" id="dDesc"></p>
+        <div class="d-buy"><b class="d-price" id="dPrice"></b><div id="dCtl"></div></div>
       </div>
     </article>
   </div>
 
-  <div class="sheet" id="cartSheet" aria-hidden="true">
-    <div class="sheet-bg" data-close></div>
-    <section class="sheet-card cart" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
-      <button class="x" type="button" data-close aria-label="Закрыть">×</button>
-      <h2 id="cartTitle">Ваш заказ</h2>
-      <ul class="cart-list" id="cartList"></ul>
-      <p class="cart-empty" id="cartEmpty">Пока пусто. Начните с курицы на углях.</p>
-      <div class="cart-form" id="cartForm">
-        <div class="seg" id="mode" role="radiogroup" aria-label="Как получить">
-          <button type="button" role="radio" data-mode="hall" aria-checked="true">В зале</button>
-          <button type="button" role="radio" data-mode="pickup" aria-checked="false">Заберу сам</button>
-          <button type="button" role="radio" data-mode="delivery" aria-checked="false">Доставка</button>
-        </div>
-        <label class="field" id="fieldTable">Номер стола<input id="inTable" inputmode="numeric" maxlength="3" placeholder="Например, 7"></label>
-        <label class="field" id="fieldTime" hidden>Когда заберёте<input id="inTime" placeholder="Например, через 30 минут"></label>
-        <label class="field" id="fieldAddr" hidden>Адрес доставки<input id="inAddr" placeholder="Улица, дом, подъезд"></label>
-        <label class="field">Пожелания<input id="inNote" placeholder="Например, курицу без острого"></label>
-        <div class="cart-total"><span>Итого</span><b id="cartTotal">0 ₽</b></div>
-        <a class="btn btn-fire btn-wide" id="sendWa" target="_blank" rel="noopener">Отправить заказ в WhatsApp</a>
-        <p class="cart-hint">Откроется WhatsApp с готовым сообщением. Останется нажать «Отправить».</p>
-      </div>
-    </section>
-  </div>
-
-  <div class="flyer" id="flyer" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <span class="flyer" id="flyer" aria-hidden="true"></span>
 
   <script src="data/menu.js"></script>
   <script src="js/icons.js"></script>
-  <script src="js/embers.js"></script>
   <script src="js/cart.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/order.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
