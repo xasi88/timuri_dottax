@@ -1,7 +1,7 @@
 // Запуск: вкладки, переходы между экранами, поиск, экран «Кафе», связь с корзиной.
 
 (function () {
-  const { $, esc, ico, ctl, toast, fly, haptic, closeSheet } = window.UI;
+  const { $, esc, ico, ctl, qtyOf, toast, fly, haptic, closeSheet } = window.UI;
   const C = window.CAFE, M = window.MENU, cart = window.Cart;
   const Menu = window.MenuView, Order = window.OrderView;
   const TABS = [["menu", "Меню", ico.menu], ["search", "Поиск", ico.search], ["order", "Заказ", ico.bag], ["cafe", "Кафе", ico.cafe]];
@@ -20,7 +20,8 @@
     const h = Number(new Intl.DateTimeFormat("ru-RU", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Moscow" }).format(new Date()));
     const open = h >= C.open && h < C.close;
     const el = $("status");
-    el.innerHTML = open ? "Открыто<span class=\"st-more\"> до 00:00</span>" : `Закрыто<span class="st-more">, откроется в ${C.open}:00</span>`;
+    const until = C.close >= 24 ? "00:00" : `${C.close}:00`;
+    el.innerHTML = open ? `Открыто<span class="st-more"> до ${until}</span>` : `Закрыто<span class="st-more">, откроется в ${C.open}:00</span>`;
     el.classList.toggle("closed", !open);
   }
   status();
@@ -30,27 +31,33 @@
   const row = (href, icon, title, sub, ext) => `<a class="row" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ""}><i>${icon}</i><div><b>${title}</b><span>${sub}</span></div>${ico.go.replace("<svg", '<svg class="go"')}</a>`;
   $("cafePage").innerHTML = `
     <div class="cafe-hero">
-      <span class="cafe-logo" role="img" aria-label="Логотип Katar Café"></span>
-      <h1>Katar Café</h1>
-      <p>${esc(C.tagline)}. Курица, мясо, люля. Доставка по Грозному.</p>
+      <img class="cafe-logo" src="img/logo.webp" alt="Логотип кафе «Катар». Куры на углях" width="640" height="688">
+      <h1>Кафе «${esc(C.name)}»</h1>
+      <p>${esc(C.tagline)}. Мангал, национальная кухня, заварочные чаи. Доставка по Грозному.</p>
       <div class="cafe-rate"><b>${esc(C.rating)}</b><span class="stars" aria-hidden="true">★★★★★</span><span>${esc(C.ratingCount)} на Яндекс Картах</span></div>
     </div>
     <div class="rows">
       ${row(C.mapUrl, ico.pin, esc(C.place), "Построить маршрут", true)}
-      ${row("tel:+" + C.phone, ico.phone, esc(C.phoneText), "Позвонить", false)}
+      ${row("tel:+" + C.phone, ico.phone, esc(C.phoneText), "Позвонить · WhatsApp", false)}
+      ${C.phone2 ? row("tel:+" + C.phone2, ico.phone, esc(C.phone2Text), "Позвонить", false) : ""}
       ${row(`https://instagram.com/${C.instagram}`, ico.ig, "@" + esc(C.instagram), "Instagram", true)}
       <div class="row"><i>${ico.clock}</i><div><b>${esc(C.hours)}</b><span>Готовим без выходных</span></div><span></span></div>
     </div>
     <div class="feats">${C.features.map((f) => `<span>${esc(f)}</span>`).join("")}</div>
     <div class="cafe-cta">
       <a class="btn btn-wa" href="https://wa.me/${C.phone}" target="_blank" rel="noopener">${ico.wa}Написать в WhatsApp</a>
-      <a class="btn btn-soft" href="#menu">Смотреть меню</a>
-    </div>`;
+      <button class="btn btn-soft" type="button" data-install>${ico.install}Установить приложение</button>
+    </div>
+    <a class="owner" href="admin.html">${ico.lock}Вход для владельца</a>`;
+
+  if (window.Data.preview) {
+    document.body.insertAdjacentHTML("afterbegin", `<div class="preview-bar">Предпросмотр черновика. Гости видят старое меню. <a href="admin.html">В админку</a></div>`);
+  }
 
   // Поиск: без учёта регистра и буквы «ё»
   const norm = (s) => s.toLowerCase().replace(/ё/g, "е");
   const all = M.flatMap((g) => g.items.map((it) => ({ it, hay: norm(`${it.name} ${it.desc} ${g.title}`) })));
-  ["Курица", "Люля", "Плов", "Манты", "Чай", "Суп"].forEach((w) => $("quick").insertAdjacentHTML("beforeend", `<button type="button">${w}</button>`));
+  ["Курица", "Галнаш", "Плов", "Манты", "Чай", "Суп"].forEach((w) => $("quick").insertAdjacentHTML("beforeend", `<button type="button">${w}</button>`));
   function search() {
     const q = norm($("q").value.trim());
     $("qClear").hidden = !q;
@@ -59,7 +66,7 @@
     const found = all.filter((x) => q.split(/\s+/).every((w) => x.hay.includes(w))).map((x) => x.it);
     $("results").innerHTML = found.length
       ? `<p class="results-head">Найдено: ${found.length}</p>${found.map(Menu.card).join("")}`
-      : `<div class="blank"><div class="blank-art">${ico.search}</div><h2>Ничего не нашли</h2><p>Попробуйте другое слово: «курица», «плов», «чай».</p></div>`;
+      : `<div class="blank"><div class="blank-art">${ico.search}</div><h2>Ничего не нашли</h2><p>Попробуйте другое слово: «курица», «галнаш», «чай».</p></div>`;
   }
   $("q").addEventListener("input", search);
   $("qClear").addEventListener("click", () => { $("q").value = ""; search(); $("q").focus(); });
@@ -86,19 +93,26 @@
   addEventListener("hashchange", route);
   route();
 
-  // Нажатия: добавить, убрать, открыть блюдо
+  // Нажатия: добавить, убрать, выбрать вариант, акция, открыть блюдо
   document.addEventListener("click", (e) => {
     const add = e.target.closest("[data-add]"), sub = e.target.closest("[data-sub]");
+    const pick = e.target.closest("[data-pick]"), offer = e.target.closest("[data-target]");
     if (add) {
       e.stopPropagation();
-      const first = !cart.qty(add.dataset.add);
-      cart.add(add.dataset.add);
+      const key = add.dataset.add, first = !cart.qty(key);
+      cart.add(key);
       haptic();
       fly(add);
-      if (first) toast(`${cart.byId[add.dataset.add].name}: в заказе`);
+      if (first) toast(`${cart.info(key).name}: в заказе`);
       return;
     }
     if (sub) { e.stopPropagation(); cart.sub(sub.dataset.sub); haptic(); return; }
+    if (pick) { e.stopPropagation(); Menu.openDish(pick.dataset.pick); return; }
+    if (offer) {
+      const t = offer.dataset.target;
+      if (t.startsWith("combo:") || cart.byId[t.replace(/^dish:/, "")]) Menu.openDish(t.replace(/^dish:/, ""));
+      return;
+    }
     const card = e.target.closest("[data-open]");
     if (card) Menu.openDish(card.dataset.open);
   });
@@ -112,10 +126,10 @@
   // Корзина изменилась: обновить счётчики, значок «Заказ», экран заказа
   function sync() {
     document.querySelectorAll("[data-ctl]").forEach((el) => {
-      const q = String(cart.qty(el.dataset.ctl));
+      const q = String(qtyOf(el.dataset.ctl));
       if (el.dataset.q !== q) { el.innerHTML = ctl(el.dataset.ctl, !!el.dataset.big); el.dataset.q = q; }
     });
-    if (Menu.openId() && $("sheet").classList.contains("open")) $("dCtl").innerHTML = ctl(Menu.openId(), true);
+    if (Menu.openKey() && $("sheet").classList.contains("open")) $("dCtl").innerHTML = ctl(Menu.openKey(), true);
     const n = cart.count();
     document.querySelectorAll("[data-count]").forEach((d) => {
       const changed = d.textContent !== String(n);

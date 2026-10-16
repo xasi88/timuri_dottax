@@ -9,6 +9,7 @@ window.OrderView = (function () {
   const mounts = [];
   const groupOf = {};
   window.MENU.forEach((g) => g.items.forEach((it) => { groupOf[it.id] = g.id; }));
+  const D = window.Data;
 
   function field(f, label, ph, extra) {
     return `<label class="field" data-for="${f}"><span class="o-label">${label}</span><input data-f="${f}" placeholder="${ph}" ${extra || ""}></label>`;
@@ -35,6 +36,8 @@ window.OrderView = (function () {
           ${field("addr", "Адрес доставки", "Улица, дом, подъезд", 'autocomplete="street-address" maxlength="120"')}
           ${field("note", "Пожелания", "Например, без острого", 'maxlength="140"')}
         </div>
+        <p class="o-bonus" data-bonus hidden></p>
+        <div class="o-sums" data-sums hidden><span>Сумма</span><s data-sum></s><span data-disc-name></span><b data-disc></b></div>
         <div class="o-total"><span>Итого</span><b data-total></b></div>
         <a class="btn btn-wa btn-wide" data-send target="_blank" rel="noopener">${ico.wa}Отправить в WhatsApp</a>
         <p class="o-hint">Откроется WhatsApp с готовым текстом. Останется нажать «Отправить».</p>
@@ -76,8 +79,15 @@ window.OrderView = (function () {
       pickup: `Заберу с собой${state.time.trim() ? `, ${state.time.trim()}` : ""}`,
       delivery: "Доставка",
     }[state.mode];
-    const rows = cart.lines().map(({ item, qty }) => `• ${item.name} × ${qty} = ${cart.rub(item.price * qty)}`);
-    const out = [`Здравствуйте! ${head}.`, "", ...rows, "", `Итого: ${cart.rub(cart.total())}`];
+    const rows = cart.lines().map(({ info, qty }) => {
+      const line = `• ${info.name} × ${qty} = ${cart.rub(info.price * qty)}`;
+      return info.combo ? `${line}
+   (${info.combo.items.map((x) => cart.info(x.opt !== undefined ? `${x.id}@${x.opt}` : x.id).name + (x.qty > 1 ? ` × ${x.qty}` : "")).join(", ")})` : line;
+    });
+    const sm = cart.summary();
+    const out = [`Здравствуйте! ${head}.`, "", ...rows, ""];
+    if (sm.discount) out.push(`Сумма: ${cart.rub(sm.sum)}`, `Скидка ${sm.bonus.percent}%: −${cart.rub(sm.discount)}`);
+    out.push(`Итого: ${cart.rub(sm.total)}`);
     if (state.mode === "delivery" && state.addr.trim()) out.push(`Адрес: ${state.addr.trim()}`);
     if (state.note.trim()) out.push(`Пожелания: ${state.note.trim()}`);
     return out.join("\n");
@@ -94,11 +104,19 @@ window.OrderView = (function () {
     mounts.forEach((el) => {
       el.querySelector("[data-empty]").hidden = lines.length > 0;
       el.querySelector("[data-full]").hidden = !lines.length;
-      el.querySelector("[data-list]").innerHTML = lines.map(({ item, qty }) => `
-        <li class="o-line"><span class="art" data-g="${groupOf[item.id]}">${art(item)}</span>
-          <div><b>${esc(item.name)}</b><span>${cart.rub(item.price)} × ${qty} = ${cart.rub(item.price * qty)}</span></div>
-          <span data-ctl="${item.id}">${ctl(item.id)}</span></li>`).join("");
-      el.querySelector("[data-total]").textContent = cart.rub(cart.total());
+      el.querySelector("[data-list]").innerHTML = lines.map(({ key, info, qty }) => `
+        <li class="o-line"><span class="art" data-g="${info.combo ? "combo" : groupOf[info.id]}">${art(info.art)}</span>
+          <div><b>${esc(info.name)}</b><span>${cart.rub(info.price)} × ${qty} = ${cart.rub(info.price * qty)}</span></div>
+          <span data-ctl="${key}">${ctl(key)}</span></li>`).join("");
+      const sm = cart.summary();
+      el.querySelector("[data-sums]").hidden = !sm.discount;
+      el.querySelector("[data-sum]").textContent = cart.rub(sm.sum);
+      el.querySelector("[data-disc-name]").textContent = sm.bonus ? `Скидка ${sm.bonus.percent}%` : "";
+      el.querySelector("[data-disc]").textContent = "−" + cart.rub(sm.discount);
+      const hint = el.querySelector("[data-bonus]");
+      hint.hidden = !sm.need;
+      if (sm.need) hint.innerHTML = `${ico.gift}<span>Добавьте ещё на <b>${cart.rub(sm.need)}</b>, и будет скидка ${sm.bonus.percent}% на весь заказ.</span>`;
+      el.querySelector("[data-total]").textContent = cart.rub(sm.total);
       el.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.mode === state.mode)));
       el.querySelector(".seg-pill").style.transform = `translateX(${idx * 100}%)`;
       el.querySelector('[data-for="table"]').hidden = state.mode !== "hall";

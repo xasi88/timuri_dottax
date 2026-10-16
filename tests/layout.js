@@ -7,18 +7,18 @@ window.checkLayout = function () {
   const R = (e) => e.getBoundingClientRect();
   const vis = (e) => { const r = R(e); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden"; };
   const bad = [];
-  const boxes = ".card,.btn,.chip,.tab,.o-line,.row,.promo,.seg button,.badge,.status,.feats span,.quick button,.searchbox,.d-buy,.sheet-card,.cafe-hero,.o-total,.c-buy,.brand,.blank";
+  const boxes = ".offer,.install-card,.o-bonus,.o-sums,.d-opts button,.d-list li,.inst-steps li,.adm-row,.adm-card,.adm-field,.adm-opt,.adm-dock-in,.adm-photo,.card,.btn,.chip,.tab,.o-line,.row,.promo,.seg button,.badge,.status,.feats span,.quick button,.searchbox,.d-buy,.sheet-card,.cafe-hero,.o-total,.c-buy,.brand,.blank";
   document.querySelectorAll("body *").forEach((e) => {
     if (!vis(e) || e.closest("svg")) return;
     if (![...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) return;
     const r = R(e), name = e.textContent.trim().slice(0, 30);
-    if ((r.right > innerWidth + 1 || r.left < -1) && !e.closest(".chips-track")) bad.push("за экраном: " + name);
+    if ((r.right > innerWidth + 1 || r.left < -1) && !e.closest(".chips-track, .offers, .adm-tabs")) bad.push("за экраном: " + name);
     const box = e.parentElement.closest(boxes);
-    if (box) {
+    if (box && box.scrollHeight <= box.clientHeight + 1) { // у прокручиваемой рамки часть содержимого скрыта нарочно
       const b = R(box);
       if (r.right > b.right + 1 || r.left < b.left - 1 || r.bottom > b.bottom + 1 || r.top < b.top - 1) bad.push("за рамкой: " + name);
     }
-    if (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== "visible" && !e.matches(".chips-track")) bad.push("обрезано: " + name);
+    if (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== "visible" && !e.matches(".chips-track, .offers, .adm-tabs")) bad.push("обрезано: " + name);
   });
   const hit = (a, b) => { const x = R(a), y = R(b); return x.left < y.right - 1 && y.left < x.right - 1 && x.top < y.bottom - 1 && y.top < x.bottom - 1; };
   document.querySelectorAll(".card, .o-line, .promo, .d-buy, .row").forEach((c) => {
@@ -28,4 +28,26 @@ window.checkLayout = function () {
       if (!parts[i].contains(parts[j]) && !parts[j].contains(parts[i]) && hit(parts[i], parts[j])) bad.push("наезд: " + parts[i].className + " / " + parts[j].className + " в " + (c.dataset.open || c.className));
   });
   return { w: innerWidth, scrollX: document.documentElement.scrollWidth > innerWidth, bad: [...new Set(bad)].slice(0, 25) };
+};
+
+// Все экраны сайта разом: меню, поиск, заказ, кафе, окна блюда и комбо, приглашение установить.
+// Запуск в консоли: await checkAll(). Корзина при этом заполняется пробными блюдами.
+window.checkAll = async function () {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const out = { w: innerWidth };
+  Cart.clear(); Cart.add("chicken@1"); Cart.add("combo:lunch"); Cart.add("thai");
+  for (const v of ["menu", "search", "order", "cafe"]) {
+    location.hash = v; await wait(500);
+    if (v === "search") { const q = document.getElementById("q"); q.value = "чай"; q.dispatchEvent(new Event("input")); await wait(300); }
+    const r = checkLayout(); out[v] = r.bad.concat(r.scrollX ? ["прокрутка вбок"] : []);
+  }
+  location.hash = "menu"; await wait(400);
+  for (const k of ["chicken", "combo:family", "steak"]) {
+    MenuView.openDish(k); await wait(700);
+    out["окно " + k] = checkLayout().bad;
+    UI.closeSheet(document.getElementById("sheet")); await wait(300);
+  }
+  const card = document.getElementById("installCard");
+  if (card) { card.hidden = false; card.classList.add("show"); await wait(500); out.install = checkLayout().bad; card.hidden = true; }
+  return out;
 };

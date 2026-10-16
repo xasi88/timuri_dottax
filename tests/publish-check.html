@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Проверка публикации админки</title>
+  <meta name="robots" content="noindex">
+  <!-- Админка с поддельным GitHub: настоящий ключ не нужен, в сеть ничего не уходит.
+       Открыть http://localhost:5180/tests/publish-check.html и вызвать в консоли await checkPublish(). -->
+  <base href="../">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <header class="appbar"><div class="appbar-in"><span class="adm-mode" id="mode"></span></div></header>
+  <nav class="adm-tabs" id="tabs"></nav>
+  <main class="adm-main" id="main"></main>
+  <div class="adm-dock" id="dock"></div>
+  <div class="sheet" id="ed" aria-hidden="true"><div class="sheet-bg" data-close></div><article class="sheet-card adm-ed" tabindex="-1"><div id="edBody"></div></article></div>
+  <div class="toast" id="toast"></div>
+  <script>
+    // Поддельный GitHub: запоминает, что админка отправила
+    window.__gh = { calls: [], blobs: [] };
+    localStorage.setItem("katar-admin-token", "test-token-local");
+    localStorage.removeItem("katar-admin-draft");
+    window.confirm = () => true;
+    window.alert = (t) => { window.__gh.alert = t; };
+    const real = window.fetch.bind(window);
+    window.fetch = async (url, opt = {}) => {
+      if (!String(url).startsWith("https://api.github.com")) return real(url, opt);
+      const path = String(url).replace(/^https:\/\/api\.github\.com\/repos\/[^/]+\/[^/]+/, "");
+      const method = opt.method || "GET", body = opt.body ? JSON.parse(opt.body) : null;
+      window.__gh.calls.push(method + " " + path);
+      const ok = (x) => new Response(JSON.stringify(x), { status: 200, headers: { "Content-Type": "application/json" } });
+      if (path === "") return ok({ full_name: "test/repo", permissions: { push: true } });
+      if (path.startsWith("/contents/data/menu.js")) {
+        const text = await (await real("data/menu.js")).text();
+        return ok({ content: btoa(String.fromCharCode(...new TextEncoder().encode(text))) });
+      }
+      if (path.startsWith("/git/ref/")) return ok({ object: { sha: "c0" } });
+      if (path.startsWith("/git/commits/")) return ok({ tree: { sha: "t0" } });
+      if (path === "/git/blobs") { window.__gh.blobs.push(body); return ok({ sha: "b" + window.__gh.blobs.length }); }
+      if (path === "/git/trees") { window.__gh.tree = body; return ok({ sha: "t1" }); }
+      if (path === "/git/commits") { window.__gh.commit = body; return ok({ sha: "c1" }); }
+      if (path.startsWith("/git/refs/")) { window.__gh.ref = body; return ok({}); }
+      return new Response("{}", { status: 404 });
+    };
+
+    // Меняем цену, публикуем, проверяем, что ушло на GitHub
+    window.checkPublish = async function () {
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      await wait(500);
+      document.querySelector('[data-act="dish-edit"][data-g="0"][data-i="1"]').click();
+      await wait(300);
+      const price = document.querySelector('#edBody [data-f="price"]');
+      price.value = "275"; price.dispatchEvent(new Event("input", { bubbles: true }));
+      document.querySelector('[data-act="ed-ok"]').click();
+      await wait(200);
+      document.querySelector('[data-act="publish"]').click();
+      await wait(800);
+      const g = window.__gh;
+      const menuBlob = g.blobs.find((b) => b.encoding === "utf-8");
+      const sent = window.AdminData.fromFile(menuBlob.content);
+      const res = {
+        calls: g.calls,
+        treePaths: g.tree.tree.map((t) => t.path),
+        newPrice: sent.menu[0].items[1].price,
+        ref: g.ref,
+        draftLeft: !!localStorage.getItem("katar-admin-draft"),
+        state: document.querySelector(".adm-state").textContent,
+        alert: g.alert || null,
+      };
+      localStorage.removeItem("katar-admin-token");
+      return res;
+    };
+  </script>
+  <script src="data/menu.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/admin-data.js"></script>
+  <script src="js/admin-github.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Общие детали интерфейса: значки, счётчик блюда, подсказка, летящая точка, окно блюда.
+// Общие детали интерфейса: значки, картинка и цена блюда, счётчик блюда, подсказка, летящая точка, окно блюда.
 
 window.UI = (function () {
   const $ = (id) => document.getElementById(id);
@@ -18,21 +18,51 @@ window.UI = (function () {
     phone: line('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>'),
     ig: line('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/>'),
     go: line('<path d="m9 6 6 6-6 6"/>'),
+    gift: line('<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8S10.5 3 8 3.5 7 8 12 8zm0 0s1.5-5 4-4.5S17 8 12 8z"/>'),
+    install: line('<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7M9 11l3 3 3-3M10 18h4"/>'),
+    lock: line('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3z"/></svg>',
   };
 
-  // Картинка блюда: фото, если есть, иначе рисунок
+  // Картинка блюда: фото, коллаж для комбо без фото, иначе рисунок
   function art(it, eager) {
-    if (!it.photo) return window.ICONS[it.icon];
-    return `<img src="${it.photo}" alt="${esc(it.name)}" ${eager ? "" : 'loading="lazy" '}decoding="async" width="480" height="480">`;
+    const img = (src, alt) => `<img src="${esc(src)}" alt="${esc(alt)}" ${eager ? "" : 'loading="lazy" '}decoding="async" width="480" height="480">`;
+    if (it.photo) return img(it.photo, it.name);
+    if (it.items) {
+      const pics = it.items.map((x) => window.Cart.byId[x.id]).filter((d) => d && d.photo).slice(0, 3);
+      if (pics.length) return `<span class="collage n${pics.length}">${pics.map((d) => img(d.photo, "")).join("")}</span>`;
+    }
+    return window.ICONS[it.icon] || window.ICONS.plate;
   }
 
+  // Цена блюда для карточки: со скидкой и старой ценой, «от» для вариантов
+  function price(it) {
+    const D = window.Data, rub = window.Cart.rub;
+    if (it.items) {
+      const full = D.comboFull(it);
+      return `<b>${rub(it.price)}</b>${full > it.price ? `<s>${rub(full)}</s>` : ""}`;
+    }
+    const base = D.minPrice(it), now = D.cut(base, it.discount);
+    const from = it.options && it.options.length > 1 ? "от " : "";
+    return `<b>${from}${rub(now)}</b>${now < base ? `<s>${rub(base)}</s>` : ""}`;
+  }
+
+  // Ключ корзины, у которого есть варианты: сначала выбрать вариант
+  const needsPick = (key) => { const it = window.Cart.byId[key]; return !!(it && it.options && it.options.length); };
+  const qtyOf = (key) => (needsPick(key) ? window.Cart.qtyDish(key) : window.Cart.qty(key));
+
   // Кнопка «+» или счётчик «− 2 +»
-  function ctl(id, big) {
-    const q = window.Cart.qty(id);
+  function ctl(key, big) {
     const cls = big ? " big" : "";
-    if (!q) return `<div class="ctl empty${cls}"><button type="button" data-add="${id}" aria-label="Добавить в заказ">${ico.plus}${big ? "В заказ" : ""}</button></div>`;
-    return `<div class="ctl has${cls}"><button type="button" data-sub="${id}" aria-label="Убрать одну порцию">${ico.minus}</button><output aria-live="polite">${q}</output><button type="button" data-add="${id}" aria-label="Добавить ещё порцию">${ico.plus}</button></div>`;
+    const it = window.Cart.byId[key.split("@")[0]];
+    if (it && it.off) return `<span class="soldout">Нет в наличии</span>`;
+    if (needsPick(key)) {
+      const n = window.Cart.qtyDish(key);
+      return `<div class="ctl empty${cls}"><button type="button" data-pick="${key}" aria-label="Выбрать вариант">${ico.plus}${big ? "Выбрать" : ""}${n ? `<i class="ctl-n">${n}</i>` : ""}</button></div>`;
+    }
+    const q = window.Cart.qty(key);
+    if (!q) return `<div class="ctl empty${cls}"><button type="button" data-add="${key}" aria-label="Добавить в заказ">${ico.plus}${big ? "В заказ" : ""}</button></div>`;
+    return `<div class="ctl has${cls}"><button type="button" data-sub="${key}" aria-label="Убрать одну порцию">${ico.minus}</button><output aria-live="polite">${q}</output><button type="button" data-add="${key}" aria-label="Добавить ещё порцию">${ico.plus}</button></div>`;
   }
 
   let toastTimer;
@@ -90,5 +120,5 @@ window.UI = (function () {
     if (lastFocus) lastFocus.focus({ preventScroll: true });
   }
 
-  return { $, esc, ico, art, ctl, toast, fly, haptic, observe, openSheet, closeSheet };
+  return { $, esc, ico, art, price, ctl, qtyOf, toast, fly, haptic, observe, openSheet, closeSheet };
 })();
