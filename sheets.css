@@ -1,0 +1,72 @@
+/* Нижняя кнопка корзины, окна блюда и заказа, летящая точка */
+
+.cartbar {
+  position: fixed; z-index: 40; left: 16px; right: 16px; bottom: max(16px, env(safe-area-inset-bottom));
+  max-width: 480px; margin: 0 auto; height: 60px; padding: 0 10px 0 10px;
+  display: flex; align-items: center; gap: 12px; border: 0; border-radius: 99px;
+  background: linear-gradient(135deg, var(--fire2), var(--fire)); color: #1b0d05;
+  box-shadow: 0 18px 40px -12px rgba(255, 106, 43, 0.8);
+  transform: translateY(140%); transition: transform 0.6s var(--spring);
+}
+.cartbar.show { transform: none; }
+.cartbar.bump { animation: bump 0.45s var(--spring); }
+@keyframes bump { 40% { transform: scale(1.06); } }
+.cartbar-count { width: 40px; height: 40px; border-radius: 50%; background: #1b0d05; color: var(--fire2); display: grid; place-items: center; font-weight: 800; }
+.cartbar-label { flex: 1; text-align: left; font-weight: 800; }
+.cartbar-sum { font: 700 16px var(--head); padding-right: 10px; }
+
+.sheet { position: fixed; inset: 0; z-index: 50; visibility: hidden; }
+.sheet.open { visibility: visible; }
+.sheet-bg { position: absolute; inset: 0; background: rgba(5, 3, 2, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; transition: opacity 0.4s var(--ease); }
+.sheet.open .sheet-bg { opacity: 1; }
+.sheet-card {
+  position: absolute; left: 0; right: 0; bottom: 0; max-height: 92svh; overflow-y: auto;
+  margin: 0 auto; max-width: 560px; padding: 26px 18px max(22px, env(safe-area-inset-bottom));
+  background: var(--bg2); border: 1px solid var(--line); border-bottom: 0; border-radius: 28px 28px 0 0;
+  transform: translateY(105%); transition: transform 0.55s var(--ease);
+}
+.sheet.open .sheet-card { transform: none; }
+.sheet-card::before { content: ""; position: absolute; top: 9px; left: 50%; width: 44px; height: 5px; translate: -50% 0; border-radius: 9px; background: var(--line); }
+.x { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.05); font-size: 24px; line-height: 1; }
+
+.dish-art { aspect-ratio: 16 / 10; border-radius: 20px; display: grid; place-items: center; color: var(--fire2); background: radial-gradient(circle at 50% 75%, rgba(255, 106, 43, 0.35), transparent 70%), var(--card2); }
+.dish-art svg { width: 46%; height: 70%; transform: scale(0.6) rotate(-10deg); opacity: 0; transition: transform 0.7s var(--spring) 0.15s, opacity 0.4s 0.15s; }
+.sheet.open .dish-art svg { transform: none; opacity: 1; }
+.dish-weight { margin: 18px 0 6px; color: var(--gold); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.dish h2 { font-size: 24px; line-height: 1.15; padding-right: 30px; }
+.dish-desc { color: var(--muted); margin: 10px 0 22px; }
+.dish-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dish-price { font: 800 26px var(--head); }
+.dish-row .ctl { height: 52px; }
+.dish-row .ctl button { width: 52px; height: 52px; }
+.dish-row .ctl .add { width: auto; padding: 0 22px; font-size: 15px; }
+
+.cart h2 { font-size: 22px; margin-bottom: 14px; }
+.cart-list { list-style: none; margin: 0; padding: 0; }
+.cart-list li { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); animation: rise 0.45s var(--ease) both; }
+.cart-list .mini { width: 44px; height: 44px; border-radius: 12px; background: var(--card2); color: var(--fire2); display: grid; place-items: center; }
+.cart-list .mini svg { width: 70%; }
+.cart-list b { display: block; font-size: 14px; line-height: 1.25; }
+.cart-list span { color: var(--muted); font-size: 13px; }
+.cart-list .ctl { height: 36px; }
+.cart-list .ctl button { width: 34px; height: 36px; font-size: 18px; }
+.cart-empty { color: var(--muted); text-align: center; padding: 24px 0; }
+
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; margin: 18px 0 14px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+.seg button { border: 0; background: none; padding: 10px 4px; border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--muted); transition: background 0.3s, color 0.3s; }
+.seg button[aria-checked="true"] { background: var(--card2); color: var(--text); box-shadow: inset 0 0 0 1px rgba(255, 140, 70, 0.4); }
+.field { display: block; font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 12px; }
+.field[hidden] { display: none; }
+.field input { display: block; width: 100%; margin-top: 6px; height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: 500 16px var(--body); outline: none; transition: border-color 0.2s; }
+.field input:focus { border-color: var(--fire); }
+.cart-total { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 0 14px; }
+.cart-total b { font: 800 26px var(--head); }
+.cart-hint { color: var(--muted); font-size: 12px; text-align: center; margin: 10px 0 0; }
+
+.flyer { position: fixed; z-index: 60; width: 18px; height: 18px; border-radius: 50%; pointer-events: none; background: var(--fire2); box-shadow: 0 0 16px var(--fire); opacity: 0; }
+
+@media (min-width: 700px) {
+  .sheet-card { bottom: 50%; border-radius: 28px; border-bottom: 1px solid var(--line); transform: translateY(calc(50% + 40px)) scale(0.96); opacity: 0; transition: transform 0.5s var(--ease), opacity 0.35s; }
+  .sheet.open .sheet-card { transform: translateY(50%); opacity: 1; }
+  .sheet-card::before { display: none; }
+}

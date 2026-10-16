@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "katar-menu",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5180", "--directory", "C:\\Vibe Codding\\Codex\\timuri_dottax"],
+      "port": 5180
+    }
+  ]
+}
