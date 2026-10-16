@@ -8,7 +8,7 @@ const steam = `<g class="fx steam"><path d="M24 14c-2-3 2-5 0-8"/><path d="M32 1
 const flame = `<g class="fx flame"><path d="M22 58c-3-4 1-6 0-10 4 3 4 6 2 10"/><path d="M32 59c-4-5 2-8 0-13 5 4 5 9 2 13"/><path d="M42 58c-3-4 1-6 0-10 4 3 4 6 2 10"/></g>`;
 
 window.ICONS = {
-  chicken: S(`<path d="M10 38c0-9 10-16 23-16 12 0 21 6 21 14 0 7-8 10-21 10-14 0-23-2-23-8z"/><path d="M38 23c3-5 7-8 11-9"/><circle cx="51" cy="13" r="2.6"/><path d="M28 22c0-5 2-9 5-12"/><circle cx="34" cy="8.5" r="2.6"/><path d="M17 33c4-4 10-6 17-6"/><path d="M8 50h48"/>${flame}`),
+  chicken: S(`<path d="M10 38c0-9 10-16 23-16 12 0 21 6 21 14 0 7-8 10-21 10-14 0-23-2-23-8z"/><path d="M45 26l8-5"/><circle cx="55.5" cy="19.5" r="2.6"/><path d="M50 32l7-2"/><circle cx="59.5" cy="29.5" r="2.6"/><path d="M17 33c4-4 10-6 17-6"/><path d="M8 50h48"/>${flame}`),
   skewer: S(`<path d="M8 50 56 14"/><rect x="17" y="34" width="9" height="9" rx="3" transform="rotate(-37 21 38)"/><rect x="28" y="26" width="9" height="9" rx="3" transform="rotate(-37 32 30)"/><rect x="39" y="18" width="9" height="9" rx="3" transform="rotate(-37 43 22)"/><circle cx="54" cy="15" r="2"/>${flame}`),
   steak: S(`<path d="M12 30c0-9 10-15 22-15 11 0 18 6 18 14 0 10-9 17-21 17-12 0-19-6-19-16z"/><circle cx="38" cy="27" r="4"/><path d="M18 34l6-6M24 38l8-8M32 40l4-4"/>`),
   plov: S(`<path d="M8 36h48c0 10-10 18-24 18S8 46 8 36z"/><path d="M14 36c2-6 8-10 18-10s16 4 18 10"/><path d="M22 31l3 2M30 29l2 3M38 30l-2 3M27 34h2M35 34h2"/>${steam}`),
