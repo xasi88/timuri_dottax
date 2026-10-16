@@ -7,15 +7,15 @@ window.CAFE = {
   signature: "Куры на углях",
   place: "Грозный, ул. Мира, 46",
   hours: "Каждый день 9:00 - 00:00",
-  phone: "79388902970",
-  phoneText: "+7 (938) 890-29-70",
-  instagram: "timuri_dottax",
+  phone: "79639802878", // WhatsApp кафе из шапки @cafe_katar
+  phoneText: "+7 (963) 980-28-78",
+  instagram: "cafe_katar",
   rating: "4,4",
   ratingCount: "173 оценки",
   mapUrl: "https://yandex.ru/maps/org/katar/132186666741/",
   open: 9, // час открытия по Москве
   close: 24, // час закрытия
-  features: ["Свои курьеры", "Еда с собой", "Wi-Fi", "Намазхана", "Парковка", "Летняя веранда"],
+  features: ["Доставка по Грозному", "Еда с собой", "Wi-Fi", "Намазхана", "Парковка", "Летняя веранда"],
   demo: true,
 };
 
