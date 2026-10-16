@@ -2,8 +2,8 @@
 // Один и тот же заказ показан на экране «Заказ» и в боковой панели большого экрана.
 
 window.OrderView = (function () {
-  const { esc, ico, ctl, toast } = window.UI;
-  const C = window.CAFE, I = window.ICONS, cart = window.Cart;
+  const { esc, ico, art, ctl, toast } = window.UI;
+  const C = window.CAFE, cart = window.Cart;
   const MODES = [["hall", "В зале"], ["pickup", "С собой"], ["delivery", "Доставка"]];
   const state = { mode: "hall", table: "", time: "", addr: "", note: "" };
   const mounts = [];
@@ -95,7 +95,7 @@ window.OrderView = (function () {
       el.querySelector("[data-empty]").hidden = lines.length > 0;
       el.querySelector("[data-full]").hidden = !lines.length;
       el.querySelector("[data-list]").innerHTML = lines.map(({ item, qty }) => `
-        <li class="o-line"><span class="art" data-g="${groupOf[item.id]}">${I[item.icon]}</span>
+        <li class="o-line"><span class="art" data-g="${groupOf[item.id]}">${art(item)}</span>
           <div><b>${esc(item.name)}</b><span>${cart.rub(item.price)} × ${qty} = ${cart.rub(item.price * qty)}</span></div>
           <span data-ctl="${item.id}">${ctl(item.id)}</span></li>`).join("");
       el.querySelector("[data-total]").textContent = cart.rub(cart.total());

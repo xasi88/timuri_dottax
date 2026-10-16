@@ -1,13 +1,15 @@
 // Всё содержимое меню. Чтобы поменять цену или блюдо, правьте только этот файл.
-// icon: рисунок из js/icons.js. badge: подпись на карточке. weight: выход блюда.
-// Цены примерные (демо). Настоящие цены узнать у владельца.
+// photo: фото блюда из img/food (с Instagram @cafe_katar). Без фото показывается рисунок icon из js/icons.js.
+// badge: подпись на карточке. weight: подпись под ценой, необязательна.
+// Блюда собраны из Instagram кафе, Яндекс Карт, 2ГИС и отзывов (docs/клиент.md).
+// Цены примерные: настоящих цен в открытых источниках нет. Узнать у владельца.
 
 window.CAFE = {
   name: "Katar",
-  signature: "Куры на углях",
+  tagline: "Шашлык на углях · Гриль",
   place: "Грозный, ул. Мира, 46",
   hours: "Каждый день 9:00 - 00:00",
-  phone: "79639802878", // WhatsApp кафе из шапки @cafe_katar
+  phone: "79639802878", // WhatsApp кафе из шапки @cafe_katar, тот же номер на Яндекс Картах
   phoneText: "+7 (963) 980-28-78",
   instagram: "cafe_katar",
   rating: "4,4",
@@ -25,36 +27,35 @@ window.MENU = [
     title: "На углях",
     note: "Жарим на живом огне. Подаём горячим.",
     items: [
-      { id: "chicken", name: "Курица на углях", desc: "Фирменное блюдо. Целая курица в маринаде, жарится на углях до золотой корочки. Сочная внутри.", price: 650, weight: "целая, ~1,2 кг", icon: "chicken", badge: "Хит", hero: true },
-      { id: "chicken-half", name: "Половина курицы на углях", desc: "Та же курица, половинка. Порция на одного голодного.", price: 350, weight: "~600 г", icon: "chicken" },
-      { id: "lula", name: "Люля-кебаб из говядины", desc: "Рубленое мясо со специями на шампуре. Гости пишут: «самые вкусные люля».", price: 350, weight: "250 г", icon: "skewer", badge: "Любят" },
-      { id: "lula-chicken", name: "Люля-кебаб из курицы", desc: "Нежнее говяжьего. С луком и зеленью.", price: 300, weight: "250 г", icon: "skewer" },
-      { id: "shashlik", name: "Шашлык из баранины", desc: "Мякоть молодой баранины, маринад на луке.", price: 480, weight: "250 г", icon: "skewer" },
-      { id: "steak", name: "Стейк из говядины", desc: "Жарим до нужной прожарки. Скажите официанту, как любите.", price: 750, weight: "300 г", icon: "steak" },
+      { id: "chicken", name: "Курица на углях", desc: "Фирменное блюдо. Курица в маринаде, жарится на углях до золотой корочки. Сочная внутри.", price: 650, weight: "целая", icon: "chicken", photo: "img/food/chicken.webp", badge: "Хит", hero: true },
+      { id: "lula", name: "Люля-кебаб", desc: "Рубленое мясо со специями на шампуре, с мангала.", price: 350, icon: "skewer", photo: "img/food/lula.webp", badge: "Любят" },
+      { id: "shashlik", name: "Шашлык", desc: "Мясо в маринаде, на углях.", price: 450, icon: "skewer", photo: "img/food/grill.webp" },
+      { id: "steak", name: "Стейк", desc: "Жарим на огне до нужной прожарки. Скажите, как любите.", price: 750, icon: "steak", photo: "img/food/steak.webp" },
     ],
   },
   {
     id: "east",
     title: "Восток",
-    note: "Готовит наш повар из Узбекистана.",
+    note: "Плов, манты и лагман по-узбекски.",
     items: [
-      { id: "plov", name: "Узбекский плов", desc: "Рис, говядина, морковь, нут и чеснок. Порция большая.", price: 350, weight: "400 г", icon: "plov", badge: "Хит" },
-      { id: "manty", name: "Манты", desc: "Сочные, с рубленым мясом и луком. Со сметаной.", price: 400, weight: "5 шт", icon: "manty", badge: "Любят" },
-      { id: "lagman", name: "Лагман", desc: "Тянутая лапша, мясо, овощи и густой бульон.", price: 350, weight: "450 г", icon: "lagman" },
-      { id: "turkish", name: "Мясо по-турецки", desc: "Говядина, тушённая с овощами и специями.", price: 450, weight: "350 г", icon: "pot" },
-      { id: "zharkoe", name: "Жаркое", desc: "Мясо с картофелем, по-домашнему.", price: 400, weight: "400 г", icon: "pot" },
+      { id: "plov", name: "Узбекский плов", desc: "Рис, мясо и морковь. Порция большая.", price: 350, icon: "plov", photo: "img/food/plov.webp", badge: "Хит" },
+      { id: "manty", name: "Манты", desc: "Сочные, с рубленым мясом и луком.", price: 400, icon: "manty", photo: "img/food/manty.webp", badge: "Любят" },
+      { id: "lagman", name: "Лагман", desc: "Лапша, мясо, овощи и густой бульон.", price: 350, icon: "lagman", photo: "img/food/lagman.webp" },
+      { id: "turkish", name: "Мясо по-турецки", desc: "Говядина с овощами и картофелем фри.", price: 450, icon: "pot", photo: "img/food/turkish.webp" },
+      { id: "zharkoe", name: "Жаркое", desc: "Мясо с картофелем, по-домашнему.", price: 400, icon: "pot" },
     ],
   },
   {
     id: "street",
-    title: "С собой",
-    note: "Удобно взять в дорогу.",
+    title: "Фастфуд",
+    note: "Удобно взять с собой.",
     items: [
-      { id: "doner", name: "Донар", desc: "Мясо с гриля, овощи и соус в лаваше.", price: 280, weight: "350 г", icon: "wrap" },
-      { id: "shawarma", name: "Шаурма с курицей", desc: "Курица, огурцы, помидоры, фирменный соус.", price: 250, weight: "350 г", icon: "wrap" },
-      { id: "gyros", name: "Гирос", desc: "В пите, с картофелем фри и соусом дзадзики.", price: 300, weight: "350 г", icon: "wrap" },
-      { id: "burger", name: "Бургер с говядиной", desc: "Котлета на гриле, сыр, овощи, соус.", price: 330, weight: "300 г", icon: "burger" },
-      { id: "pizza", name: "Пицца с курицей", desc: "Тонкое тесто, курица, сыр, томаты.", price: 550, weight: "30 см", icon: "pizza" },
+      { id: "doner", name: "Донар", desc: "Мясо с гриля, овощи и соус в лаваше.", price: 280, icon: "wrap" },
+      { id: "shawarma", name: "Шаурма", desc: "Мясо, свежие овощи и соус в лаваше.", price: 250, icon: "wrap" },
+      { id: "gyros", name: "Гирос", desc: "Мясо с гриля в пите.", price: 300, icon: "wrap" },
+      { id: "burger", name: "Бургер", desc: "Котлета на гриле, овощи, соус.", price: 330, icon: "burger" },
+      { id: "pizza", name: "Пицца", desc: "Горячая, из печи.", price: 550, icon: "pizza" },
+      { id: "fries", name: "Картофель фри", desc: "Золотистый, к мясу и курице.", price: 150, icon: "plate", photo: "img/food/fries.webp" },
     ],
   },
   {
@@ -62,10 +63,10 @@ window.MENU = [
     title: "Супы и обеды",
     note: "Обед как дома.",
     items: [
-      { id: "borsch", name: "Красный борщ", desc: "На говяжьем бульоне. Со сметаной.", price: 250, weight: "350 мл", icon: "soup" },
-      { id: "chicken-soup", name: "Куриный суп", desc: "Лёгкий бульон с лапшой и курицей.", price: 220, weight: "350 мл", icon: "soup" },
-      { id: "cutlet", name: "Котлета с гречкой", desc: "Домашняя котлета и рассыпчатая гречка.", price: 300, weight: "350 г", icon: "plate" },
-      { id: "fettuccine", name: "Фетучини с курицей", desc: "Паста в сливочном соусе.", price: 380, weight: "300 г", icon: "pasta" },
+      { id: "borsch", name: "Красный борщ", desc: "На мясном бульоне. Со сметаной.", price: 250, icon: "soup" },
+      { id: "chicken-soup", name: "Куриный суп", desc: "Лёгкий бульон с курицей.", price: 220, icon: "soup" },
+      { id: "cutlet", name: "Котлета с гречкой", desc: "Домашняя котлета и рассыпчатая гречка.", price: 300, icon: "plate" },
+      { id: "fettuccine", name: "Фетучини с курицей", desc: "Паста в сливочном соусе.", price: 380, icon: "pasta" },
     ],
   },
   {
@@ -73,11 +74,11 @@ window.MENU = [
     title: "Чай и выпечка",
     note: "Гости хвалят наши чаи.",
     items: [
-      { id: "tea", name: "Чай в чайнике", desc: "Чёрный или зелёный, с чабрецом или лимоном.", price: 150, weight: "800 мл", icon: "tea" },
-      { id: "kompot", name: "Компот", desc: "Домашний, из сухофруктов.", price: 100, weight: "300 мл", icon: "glass" },
-      { id: "bun", name: "Булочка с повидлом", desc: "Свежая, мягкая.", price: 60, weight: "1 шт", icon: "bun" },
-      { id: "lavash", name: "Лаваш", desc: "Тёплый, к курице и люля.", price: 40, weight: "1 шт", icon: "bun" },
-      { id: "sauce", name: "Фирменный соус", desc: "Чесночный или острый. К курице обязательно.", price: 50, weight: "50 г", icon: "sauce" },
+      { id: "tea", name: "Чай в чайнике", desc: "Горячий, на компанию.", price: 150, icon: "tea" },
+      { id: "kompot", name: "Компот", desc: "Домашний.", price: 100, icon: "glass" },
+      { id: "bun", name: "Булочка с повидлом", desc: "Свежая, мягкая.", price: 60, icon: "bun" },
+      { id: "lavash", name: "Лаваш", desc: "Тёплый, к курице и люля.", price: 40, icon: "bun" },
+      { id: "sauce", name: "Соус", desc: "К курице и мясу.", price: 50, icon: "sauce" },
     ],
   },
 ];

@@ -1,8 +1,8 @@
 // Экран «Меню»: главная карточка, полоса разделов, карточки блюд, окно блюда.
 
 window.MenuView = (function () {
-  const { $, esc, ctl, observe, openSheet } = window.UI;
-  const C = window.CAFE, M = window.MENU, I = window.ICONS, cart = window.Cart;
+  const { $, esc, art, ctl, observe, openSheet } = window.UI;
+  const C = window.CAFE, M = window.MENU, cart = window.Cart;
   const hero = M.flatMap((g) => g.items).find((it) => it.hero);
   const groupOf = {};
   M.forEach((g) => g.items.forEach((it) => { groupOf[it.id] = g; }));
@@ -10,23 +10,23 @@ window.MenuView = (function () {
   // Карточка блюда: общая для меню и поиска
   function card(it) {
     return `<article class="card" data-open="${it.id}" data-g="${groupOf[it.id].id}" tabindex="0" aria-label="${esc(it.name)}, ${cart.rub(it.price)}">
-      <div class="art">${I[it.icon]}${it.badge ? `<span class="badge">${esc(it.badge)}</span>` : ""}</div>
+      <div class="art">${art(it)}${it.badge ? `<span class="badge">${esc(it.badge)}</span>` : ""}</div>
       <div class="c-body">
         <h3 class="c-name">${esc(it.name)}</h3>
         <p class="c-desc">${esc(it.desc)}</p>
-        <div class="c-buy"><span class="c-price"><b>${cart.rub(it.price)}</b><small>${esc(it.weight)}</small></span><span data-ctl="${it.id}">${ctl(it.id)}</span></div>
+        <div class="c-buy"><span class="c-price"><b>${cart.rub(it.price)}</b>${it.weight ? `<small>${esc(it.weight)}</small>` : ""}</span><span data-ctl="${it.id}">${ctl(it.id)}</span></div>
       </div>
     </article>`;
   }
 
   function render() {
     $("promo").innerHTML = `
+      <img class="promo-photo" src="${hero.photo}" alt="" fetchpriority="high">
       <div class="promo-text">
-        <p class="promo-kicker">Фирменное блюдо</p>
+        <p class="promo-kicker">🔥 Фирменное блюдо</p>
         <h1>${esc(hero.name)}</h1>
         <p class="promo-meta">Маринад, живой огонь, золотая корочка</p>
       </div>
-      <div class="promo-art" aria-hidden="true">${I[hero.icon]}</div>
       <div class="promo-buy"><span class="promo-price">${cart.rub(hero.price)}</span><span data-ctl="${hero.id}" data-big="1">${ctl(hero.id, true)}</span></div>
       <a class="promo-rating" href="${C.mapUrl}" target="_blank" rel="noopener">★ ${esc(C.rating)} · ${esc(C.ratingCount)} на Яндекс Картах</a>`;
 
@@ -88,8 +88,8 @@ window.MenuView = (function () {
     const it = cart.byId[id];
     openId = id;
     $("sheet").querySelector(".d-art").dataset.g = groupOf[id].id;
-    $("dArt").innerHTML = I[it.icon];
-    $("dMeta").textContent = `${groupOf[id].title} · ${it.weight}`;
+    $("dArt").innerHTML = art(it, true);
+    $("dMeta").textContent = it.weight ? `${groupOf[id].title} · ${it.weight}` : groupOf[id].title;
     $("dName").textContent = it.name;
     $("dDesc").textContent = it.desc;
     $("dPrice").textContent = cart.rub(it.price);

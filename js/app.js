@@ -20,7 +20,7 @@
     const h = Number(new Intl.DateTimeFormat("ru-RU", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Moscow" }).format(new Date()));
     const open = h >= C.open && h < C.close;
     const el = $("status");
-    el.textContent = open ? "Открыто до 00:00" : `Откроется в ${C.open}:00`;
+    el.innerHTML = open ? "Открыто<span class=\"st-more\"> до 00:00</span>" : `Закрыто<span class="st-more">, откроется в ${C.open}:00</span>`;
     el.classList.toggle("closed", !open);
   }
   status();
@@ -30,8 +30,9 @@
   const row = (href, icon, title, sub, ext) => `<a class="row" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ""}><i>${icon}</i><div><b>${title}</b><span>${sub}</span></div>${ico.go.replace("<svg", '<svg class="go"')}</a>`;
   $("cafePage").innerHTML = `
     <div class="cafe-hero">
-      <h1>Katar</h1>
-      <p>Кафе в Грозном. Курица на углях, люля, плов и манты.</p>
+      <span class="cafe-logo" role="img" aria-label="Логотип Katar Café"></span>
+      <h1>Katar Café</h1>
+      <p>${esc(C.tagline)}. Курица, мясо, люля. Доставка по Грозному.</p>
       <div class="cafe-rate"><b>${esc(C.rating)}</b><span class="stars" aria-hidden="true">★★★★★</span><span>${esc(C.ratingCount)} на Яндекс Картах</span></div>
     </div>
     <div class="rows">

@@ -31,6 +31,12 @@ test("у каждого блюда есть рисунок, цена и уник
   assert.strictEqual(MENU.flatMap((g) => g.items).filter((it) => it.hero).length, 1);
 });
 
+test("у каждого фото есть файл", () => {
+  MENU.forEach((g) => g.items.forEach((it) => {
+    if (it.photo) assert.ok(fs.existsSync(path.join(__dirname, "..", it.photo)), "нет файла " + it.photo);
+  }));
+});
+
 test("в текстах меню нет длинного тире", () => {
   const text = fs.readFileSync(path.join(__dirname, "..", "data/menu.js"), "utf8") + fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
   assert.ok(!/[—–]/.test(text));
