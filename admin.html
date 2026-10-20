@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Админка · Кафе «Катар»</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0e0c0b">
+  <link rel="icon" href="img/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="img/icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <header class="appbar">
+    <div class="appbar-in">
+      <a class="brand" href="./" aria-label="Открыть сайт кафе">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text"><b>Катар</b><small>Админка</small></span>
+      </a>
+      <span class="adm-mode" id="mode"></span>
+    </div>
+  </header>
+
+  <nav class="adm-tabs" id="tabs" aria-label="Разделы админки"></nav>
+  <main class="adm-main" id="main" aria-live="polite"><p class="adm-loading">Загрузка меню…</p></main>
+
+  <div class="adm-dock" id="dock"></div>
+
+  <div class="sheet" id="ed" aria-hidden="true">
+    <div class="sheet-bg" data-close></div>
+    <article class="sheet-card adm-ed" role="dialog" aria-modal="true" aria-label="Редактор" tabindex="-1">
+      <button class="sheet-x" type="button" data-close aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div id="edBody"></div>
+    </article>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="data/menu.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/admin-data.js"></script>
+  <script src="js/admin-github.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
