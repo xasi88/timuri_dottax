@@ -1,6 +1,7 @@
 // Работа без сети. Сначала сеть, чтобы гость сразу видел новые цены и акции.
 // Нет сети: отдаём последнюю сохранённую копию.
 
+// На xasi88.github.io живут и другие приложения автора: удаляем только свои копии (katar-*).
 const CACHE = "katar-v2";
 const CORE = [
   "./", "index.html", "data/menu.js", "manifest.webmanifest",
@@ -14,7 +15,7 @@ self.addEventListener("install", (e) => {
 });
 
 self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith("katar-") && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
 self.addEventListener("fetch", (e) => {
